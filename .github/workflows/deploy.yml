@@ -1,0 +1,50 @@
+# Deploy to Cloudflare Pages on every push to main
+#
+# Required GitHub Actions secrets:
+#
+#   CLOUDFLARE_API_TOKEN
+#     - Go to https://dash.cloudflare.com/profile/api-tokens
+#     - Click "Create Token"
+#     - Use the "Edit Cloudflare Workers" template (or create a custom token
+#       with Account > Cloudflare Pages > Edit and Account > Workers KV Storage > Edit)
+#     - Copy the token and add it as a repository secret in
+#       Settings > Secrets and variables > Actions > New repository secret
+#
+#   CLOUDFLARE_ACCOUNT_ID
+#     - Open https://dash.cloudflare.com and select your account
+#     - The Account ID is shown in the right sidebar on the Overview page
+#     - Copy it and add it as a repository secret the same way
+
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with @cloudflare/next-on-pages
+        run: npx @cloudflare/next-on-pages
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: url-shortener
+          directory: .vercel/output/static
