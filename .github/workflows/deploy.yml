@@ -39,7 +39,7 @@ jobs:
         run: npm ci
 
       - name: Build with @opennextjs/cloudflare
-        run: npx opennextjs-cloudflare
+        run: npx opennextjs-cloudflare build
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
