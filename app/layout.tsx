@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "URL Shortener",
-  description: "Shorten your URLs with a simple, fast URL shortener",
+  title: "smolURL",
+  description: "Shorten your URLs without any hustle",
 };
 
 export default function RootLayout({

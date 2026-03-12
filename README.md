@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# smolURL 🦈
 
-## Getting Started
+I use TinyURL a lot. It works fine, but every other click they remind me I could be paying for "premium" features I don't need. I just want to shorten a URL. So I built my own.
 
-First, run the development server:
+smolURL is a self-hosted URL shortener that runs entirely on Cloudflare's free tier. No accounts, no upsells, no tracking.
+
+## How it works
+
+One Cloudflare Worker handles everything — the frontend, the API, and the redirects.
+
+```
+POST /api/shorten  →  generates a 2-char code, stores code→URL in KV
+GET  /:code        →  looks up the code in KV, 301 redirects (or 404)
+GET  /             →  serves the homepage
+```
+
+**Database:** Cloudflare KV. Each entry expires after 7 days.
+
+**Domain:** Whatever domain your Worker runs on. By default that's `url-shortener.<account>.workers.dev`. You can attach a custom domain in the Cloudflare dashboard.
+
+## Tech stack
+
+- Next.js 16 (TypeScript, Tailwind CSS)
+- Cloudflare Workers via [@opennextjs/cloudflare](https://opennext.js.org/cloudflare)
+- Cloudflare KV for storage
+- GitHub Actions for CI/CD
+
+## Setup
+
+### 1. Install
+
+```bash
+npm install
+```
+
+### 2. Create a KV namespace
+
+```bash
+npx wrangler kv:namespace create URL_SHORTENER_KV
+```
+
+Paste the resulting ID into `wrangler.toml`:
+
+```toml
+[[kv_namespaces]]
+binding = "URL_SHORTENER_KV"
+id = "<your-namespace-id>"
+```
+
+### 3. Local dev
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 4. Deploy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run pages:build
+npm run pages:deploy
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Or push to `main` — GitHub Actions handles it automatically. You'll need two repository secrets:
 
-## Learn More
+- `CLOUDFLARE_API_TOKEN` — create at [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) with Workers Scripts (Edit), Workers KV Storage (Edit), and Account Settings (Read)
+- `CLOUDFLARE_ACCOUNT_ID` — found on your Cloudflare dashboard overview page
 
-To learn more about Next.js, take a look at the following resources:
+## Project structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+  [code]/route.ts       ← redirect handler
+  api/shorten/route.ts  ← URL creation endpoint
+  page.tsx              ← homepage UI
+  layout.tsx
+lib/
+  kv.ts                 ← KV read/write helpers
+wrangler.toml           ← Cloudflare Worker config
+open-next.config.ts     ← OpenNext adapter config
+```
