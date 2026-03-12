@@ -45,9 +45,10 @@ export default function Home() {
     setShortUrl("");
     setCopied(false);
 
-    if (!longUrl.startsWith("http://") && !longUrl.startsWith("https://")) {
-      setError("URL must start with http:// or https://");
-      return;
+    let url = longUrl;
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = "https://" + url;
+      setLongUrl(url);
     }
 
     setLoading(true);
@@ -55,7 +56,7 @@ export default function Home() {
       const res = await fetch("/api/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: longUrl }),
+        body: JSON.stringify({ url }),
       });
       const data: { short?: string; error?: string } = await res.json();
       if (!res.ok) {
