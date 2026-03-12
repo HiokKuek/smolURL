@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { putUrl } from "@/lib/kv";
 
-export const runtime = "edge";
-
 const CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 function generateCode(length: number): string {

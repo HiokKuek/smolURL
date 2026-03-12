@@ -1,6 +1,12 @@
 name = "url-shortener"
+main = ".open-next/worker.js"
 compatibility_date = "2026-03-12"
 compatibility_flags = ["nodejs_compat"]
+
+# Assets configuration for serving static files
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
 
 [[kv_namespaces]]
 binding = "URL_SHORTENER_KV"

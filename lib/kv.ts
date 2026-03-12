@@ -1,7 +1,7 @@
-import { getRequestContext } from "@cloudflare/next-on-pages";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 function getKV(): KVNamespace {
-  return getRequestContext().env.URL_SHORTENER_KV;
+  return getCloudflareContext().env.URL_SHORTENER_KV;
 }
 
 const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days

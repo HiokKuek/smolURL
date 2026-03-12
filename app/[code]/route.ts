@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUrl } from "@/lib/kv";
 
-export const runtime = "edge";
-
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
